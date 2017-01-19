@@ -59,8 +59,10 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
   });
 
   const fetch = (to: string, from: string) => {
-    const fromDirectoryPath = dirname(from);
-    const toPath = resolve(fromDirectoryPath, to);
+    // getting absolute path to the processing file
+    const toPath = /[^\\/?%*:|"<>\.]/i.test(to[0])
+      ? require.resolve(to)
+      : resolve(dirname(from), to);    
 
     return getTokens(runner, toPath, options.filetypes);
   };
