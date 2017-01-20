@@ -99,6 +99,9 @@ export default ({
     visitor: {
       ImportDeclaration (path: Object, stats: Object): void {
         stats.opts.filetypes = stats.opts.filetypes || {};
+        stats.opts.preprocessCSS = stats.opts.preprocessCSS || function (css) {
+          return css;
+        };
 
         const extension = path.node.source.value.lastIndexOf('.') > -1 ? path.node.source.value.substr(path.node.source.value.lastIndexOf('.')) : null;
 
@@ -128,7 +131,8 @@ export default ({
         filenameMap[filename].styleModuleImportMap[styleImportName] = requireCssModule(targetResourcePath, {
           context: stats.opts.context,
           filetypes: stats.opts.filetypes || {},
-          generateScopedName: stats.opts.generateScopedName
+          generateScopedName: stats.opts.generateScopedName,
+          preprocessCSS: stats.opts.preprocessCSS
         });
 
         if (stats.opts.webpackHotModuleReloading) {

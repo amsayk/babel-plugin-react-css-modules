@@ -18,7 +18,7 @@ import type {
   StyleModuleMapType
 } from './types';
 
-const getTokens = (runner, cssSourceFilePath: string, filetypes): StyleModuleMapType => {
+const getTokens = (runner, cssSourceFilePath: string, filetypes, preprocessCSS): StyleModuleMapType => {
   const extension = cssSourceFilePath.substr(cssSourceFilePath.lastIndexOf('.'));
   const syntax = filetypes[extension];
 
@@ -31,8 +31,9 @@ const getTokens = (runner, cssSourceFilePath: string, filetypes): StyleModuleMap
     options.syntax = require(syntax);
   }
 
+  const source = preprocessCSS(readFileSync(cssSourceFilePath, 'utf-8'), cssSourceFilePath);
   const lazyResult = runner
-    .process(readFileSync(cssSourceFilePath, 'utf-8'), options);
+    .process(source, options);
 
   lazyResult
     .warnings()
@@ -64,7 +65,7 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
       ? require.resolve(to)
       : resolve(dirname(from), to);
 
-    return getTokens(runner, toPath, options.filetypes);
+    return getTokens(runner, toPath, options.filetypes, options.preprocessCSS);
   };
 
   const plugins = [
@@ -81,5 +82,5 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
 
   runner = postcss(plugins);
 
-  return getTokens(runner, cssSourceFilePath, options.filetypes);
+  return getTokens(runner, cssSourceFilePath, options.filetypes, options.preprocessCSS);
 };
